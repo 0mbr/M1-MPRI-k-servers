@@ -1,7 +1,11 @@
 # Evaluation of our solutions, using if_random.py example case.
 
+# Personnal
+from main import naive_algo, all_servers_algo, KServerInstance
+
 # Std
 from os import listdir
+import sys
 
 # Thrid party
 import matplotlib.pyplot as plt
@@ -11,13 +15,14 @@ import scipy.stats as stats
 
 def eval_instance(instance, algo, n_runs=100, confidence=0.95, plot=False):
   '''
-  Evaluation of an algorithm on an already parsed k-server instance over n_runs.
-  If plotting is enabled, plot x=nth-run y=score-of-nth-run
-  The algo argument should provide a run() function that takes an instance and returns
-  a score.
+  Evaluation of an algorithm over n_runs. If plotting is enabled, plot the scores
+  and the confidence interval.
+  
   Returns a tuple with:
   - The mean score (int)
   - The confidence interval (tuple of int * int)
+
+  (The algo argument should be a callable object)
   '''
   scores = []
   for epoch in range(n_runs):
@@ -25,13 +30,15 @@ def eval_instance(instance, algo, n_runs=100, confidence=0.95, plot=False):
 
   average = np.mean(scores)
   (low, high) = stats.norm.interval(confidence, loc=average, scale=stats.sem(scores))
+  print(low, high)
 
   if plot:
-    plt.plot(np.arange(len(scores)), scores)
-    # Confidence interval ploting test (Good)
-    #plt.fill_between(np.arange(0, n_runs, n_runs/len(scores)), np.array(scores)+5, np.array(scores)-5, 
-    #                 color="orange", alpha=0.3, linewidth=0.6)
-    plt.yticks(np.arange(0, 200, 25))
+    plt.plot()
+    x = np.arange(len(scores))
+    plot_curve(x, scores, "score")
+    plot_fill(x, [(low, high) for i in range(len(x))])
+    plot_set_yticks(scores)
+    plt.legend()
     plt.show()
 
   return (average, (low, high))
@@ -44,22 +51,27 @@ def all_eval(instances, algo, n_runs=100, confidence=0.95, plot=False):
   '''
   averages  = []
   intervals = []
+  opts = []
   for instance in instances:
     avg, confidence_interval = eval_instance(instance, algo, n_runs, confidence)
     averages.append(avg)
     intervals.append(confidence_interval)
+    opts.append(instance.opt)
 
   if plot:
-    plot_curve(np.arange(len(averages)), averages)
+    x = np.arange(len(averages))
+    plot_curve(x, averages, "scores")
+    plot_curve(x, opts, "opt")
     plot_fill(np.arange(len(averages)), intervals)
     plot_set_yticks(averages)
+    plt.legend()
     plt.show()
 
   return averages, intervals
 
 
-def plot_curve(x, y):
-  plt.plot(x, y)
+def plot_curve(x, y, l):
+  plt.plot(x, y, label=l)
   max_y = np.max(y)
 
 
@@ -74,11 +86,37 @@ def plot_fill(x, intervals):
 
 def plot_set_yticks(y):
   max_y = int(np.max(y))
-  plt.yticks(np.arange(0, int(max_y + max_y/2), step=(int(max_y/8))))
+  plt.ylim(ymin=0, ymax=(max_y+int(max_y/3)))
 
 
 _instances_dir_str = "./instances/"
 _instances_str = listdir("instances")
+
+
+if __name__ == "__main__":
+  i = 0
+  for index, f_name in enumerate(_instances_str):
+    if i % 2 == 0:
+      print("%2d"%index, f_name.ljust(35), end="")
+    else:
+      print(index, f_name)
+    i = (i+1) % 2
+  print()
+  n = int(input(f"-1 for all, 0-{len(_instances_str)} otherwise.\n"))
+
+  if (n != -1):
+    i = KServerInstance()
+    f_name = _instances_str[n]
+    i.parse(f_name)
+    eval_instance(i, naive_algo, plot=True)
+  else:
+    instances = []
+    for f_name in _instances_str:
+      i = KServerInstance()
+      i.parse(f_name)
+      instances.append(i)
+    all_eval(instances, naive_algo, plot=True)
+
 
 
 # Class to test evaluate-functions behaviors
@@ -88,18 +126,18 @@ class RandomAlgo:
     self.low_b = lower_bound
     self.up_b  = upper_bound
 
-  def run(self, some_stuff):
+  def __call__(self, some_stuff):
     rd = self.rng.random()
     rd = (self.up_b - self.low_b) * rd + self.low_b
     return rd
 
-
+'''
 if __name__ == "__main__":
-
   instance = None
   algo = RandomAlgo(70, 120)
 
   eval_instance(None, algo, plot=True)
   all_eval(range(15), algo, plot=True)
+'''
 
   
