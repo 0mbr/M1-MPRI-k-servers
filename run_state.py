@@ -1,10 +1,14 @@
 class Server:
-    def __init__(self):
+    def __init__(self, id_server):
+        self.id = id_server
         self.pos_x = 0
         self.pos_y = 0
 
     def __repr__(self):
         return "server: x: " + str(self.pos_x) + ", y: " + str(self.pos_y)
+
+    def never_move(self):
+        return self.pos_x == 0 and self.pos_y == 0
 
     def distance_with(self, position: tuple):
         """
@@ -28,8 +32,8 @@ class RunState:
         self.sum_distance = 0
 
         # initiation of k servers
-        for _ in range(self.k_instance.k):
-            self.servers.append(Server())
+        for index in range(self.k_instance.k):
+            self.servers.append(Server(index))
 
     def get_customer_site(self):
         """
@@ -53,7 +57,7 @@ class RunState:
             distances.append(distance)
         return distances
 
-    def naive_update(self, selected_server: int):
+    def update(self, selected_server: int):
         """
         :param selected_server: number of server that treat request
         """
@@ -63,13 +67,13 @@ class RunState:
             distance = self.distances[selected_server]
             self.sum_distance = self.sum_distance + distance
 
-            # print("num_request: " + str(self.num_request))
-            # print("selected server number: " + str(selected_server) + ", " + str(self.servers[selected_server]))
-            # print("distances: " + str(self.distances))
+            print("num_request: " + str(self.num_request))
+            print("selected server number: " + str(selected_server) + ", " + str(self.servers[selected_server]))
+            print("distances: " + str(self.distances))
 
             self.servers[selected_server].pos_x, self.servers[selected_server].pos_y = self.get_customer_site()
 
-            # print("Updated, sum distance: " + str(self.sum_distance))
-            # print("---------------------------------------")
+            print("Updated, sum distance: " + str(self.sum_distance))
+            print("---------------------------------------")
 
             self.num_request += 1

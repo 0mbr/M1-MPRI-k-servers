@@ -43,18 +43,50 @@ class KServerInstance:
 
 
 def naive_algo(k_instance: KServerInstance):
+    """
+    Choosing the closest server to treat the costumer for every request
+    :param k_instance:
+    :return:
+    """
     state = RunState(k_instance)
 
     while state.num_request <= len(state.k_instance.requests) - 1:
         distances = state.distances
         min_distance = min(distances)
+        # index of minimum distance server
+        index = distances.index(min_distance)
+        # choose the closest server to treat the costumer
+        state.update(index)
+    print("The result is: " + str(state.sum_distance))
+
+
+def all_servers_algo(k_instance: KServerInstance):
+    """
+    Choosing the closest server to treat the costumer for every request
+    AND, if there are servers that never move, we prioritize them so that we use all servers we have.
+    :param k_instance:
+    :return:
+    """
+    state = RunState(k_instance)
+
+    while state.num_request <= len(state.k_instance.requests) - 1:
+        distances = state.distances
+
+        min_distance = min(distances)
+        # index of minimum distance server
         index = distances.index(min_distance)
 
-        state.naive_update(index)
+        for server in state.servers:
+            if server.never_move():
+                index = server.id
+
+        # choose the closest server to treat the costumer
+        state.update(index)
     print("The result is: " + str(state.sum_distance))
 
 
 if __name__ == "__main__":
     kinstance = KServerInstance()
     kinstance.parse("instance_N200_OPT221.inst")
-    naive_algo(kinstance)
+    # naive_algo(kinstance)
+    all_servers_algo(kinstance)
