@@ -67,13 +67,13 @@ class RunState:
             distance = self.distances[selected_server]
             self.sum_distance = self.sum_distance + distance
 
-            print("num_request: " + str(self.num_request))
-            print("selected server number: " + str(selected_server) + ", " + str(self.servers[selected_server]))
-            print("distances: " + str(self.distances))
+            # print("num_request: " + str(self.num_request))
+            # print("selected server number: " + str(selected_server) + ", " + str(self.servers[selected_server]))
+            # print("distances: " + str(self.distances))
 
             self.servers[selected_server].pos_x, self.servers[selected_server].pos_y = self.get_customer_site()
 
-            print("Updated, sum distance: " + str(self.sum_distance))
-            print("---------------------------------------")
+            # print("Updated, sum distance: " + str(self.sum_distance))
+            # print("---------------------------------------")
 
             self.num_request += 1

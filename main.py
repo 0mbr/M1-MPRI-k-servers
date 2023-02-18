@@ -1,6 +1,7 @@
 # pattern matching and regexp
 import re
 from run_state import RunState
+import random
 
 f_instance = './instances/'
 
@@ -36,15 +37,16 @@ class KServerInstance:
             requests_str = rm_stuff("\n", lines[4]).split(" ")[:-1]
             self.requests = list([int(w) for w in requests_str])
 
-            print(self.opt)
-            print(self.k)
-            print(self.sites)
-            print(self.requests)
+            # print(self.opt)
+            # print(self.k)
+            # print(self.sites)
+            # print(self.requests)
 
 
 def naive_algo(k_instance: KServerInstance):
     """
-    Choosing the closest server to treat the costumer for every request
+    Choose the closest server to treat the costumer for every request
+    20 instances difference of sum_distance: 148,614
     :param k_instance:
     :return:
     """
@@ -57,13 +59,14 @@ def naive_algo(k_instance: KServerInstance):
         index = distances.index(min_distance)
         # choose the closest server to treat the costumer
         state.update(index)
-    print("The result is: " + str(state.sum_distance))
+    return state.sum_distance
 
 
 def all_servers_algo(k_instance: KServerInstance):
     """
-    Choosing the closest server to treat the costumer for every request
+    Choose the closest server to treat the costumer for every request
     AND, if there are servers that never move, we prioritize them so that we use all servers we have.
+    20 instances difference of sum_distance: 13,667
     :param k_instance:
     :return:
     """
@@ -82,11 +85,37 @@ def all_servers_algo(k_instance: KServerInstance):
 
         # choose the closest server to treat the costumer
         state.update(index)
-    print("The result is: " + str(state.sum_distance))
+    # print("The offline result is: " + str(state.k_instance.opt))
+    # print("The online algorithm result is: " + str(state.sum_distance))
+    return state.sum_distance
+
+
+def random_all_servers_algo(k_instance: KServerInstance):
+    """
+    Choose randomly servers to treat the costumer for every request
+    AND, if there are servers that never move, we prioritize them so that we use all servers we have.
+    20 instances difference of sum_distance: around 275,500
+    :param k_instance:
+    :return:
+    """
+    state = RunState(k_instance)
+
+    while state.num_request <= len(state.k_instance.requests) - 1:
+        index = random.randint(0, len(state.servers)-1)
+
+        for server in state.servers:
+            if server.never_move():
+                index = server.id
+
+        # choose the closest server to treat the costumer
+        state.update(index)
+    # print("The offline result is: " + str(state.k_instance.opt))
+    # print("The online algorithm result is: " + str(state.sum_distance))
+    return state.sum_distance
 
 
 if __name__ == "__main__":
     kinstance = KServerInstance()
-    kinstance.parse("instance_N200_OPT221.inst")
+    kinstance.parse("instance_N200_OPT347.inst")
     # naive_algo(kinstance)
     all_servers_algo(kinstance)

@@ -1,7 +1,7 @@
 # Evaluation of our solutions, using if_random.py example case.
 
 # Personnal
-from main import naive_algo, all_servers_algo, KServerInstance
+from main import naive_algo, all_servers_algo, KServerInstance, random_all_servers_algo
 
 # Std
 from os import listdir
@@ -17,7 +17,7 @@ def eval_instance(instance, algo, n_runs=100, confidence=0.95, plot=False):
   '''
   Evaluation of an algorithm over n_runs. If plotting is enabled, plot the scores
   and the confidence interval.
-  
+
   Returns a tuple with:
   - The mean score (int)
   - The confidence interval (tuple of int * int)
@@ -30,10 +30,11 @@ def eval_instance(instance, algo, n_runs=100, confidence=0.95, plot=False):
 
   average = np.mean(scores)
   (low, high) = stats.norm.interval(confidence, loc=average, scale=stats.sem(scores))
-  print(low, high)
+  # print(low, high)
 
   if plot:
     plt.plot()
+
     x = np.arange(len(scores))
     plot_curve(x, scores, "score")
     plot_fill(x, [(low, high) for i in range(len(x))])
@@ -67,6 +68,11 @@ def all_eval(instances, algo, n_runs=100, confidence=0.95, plot=False):
     plt.legend()
     plt.show()
 
+  sum_diff = 0
+  for i in range(len(averages)):
+    sum_diff += averages[i] - opts[i]
+  print("The 20 instances difference of sum distance between opt and average: " + str(sum_diff))
+
   return averages, intervals
 
 
@@ -94,28 +100,33 @@ _instances_str = listdir("instances")
 
 
 if __name__ == "__main__":
-  i = 0
-  for index, f_name in enumerate(_instances_str):
-    if i % 2 == 0:
-      print("%2d"%index, f_name.ljust(35), end="")
-    else:
-      print(index, f_name)
-    i = (i+1) % 2
-  print()
-  n = int(input(f"-1 for all, 0-{len(_instances_str)} otherwise.\n"))
+  # i = 0
+  # for index, f_name in enumerate(_instances_str):
+  #   if i % 2 == 0:
+  #     print("%2d"%index, f_name.ljust(35), end="")
+  #   else:
+  #     print(index, f_name)
+  #   i = (i+1) % 2
+  # print()
+  # n = int(input(f"-1 for all, 0-{len(_instances_str)} otherwise.\n"))
+  #
 
+  # algo = random_all_servers_algo
+  algo = all_servers_algo
+  # algo = naive_algo
+  n = -1
   if (n != -1):
     i = KServerInstance()
     f_name = _instances_str[n]
     i.parse(f_name)
-    eval_instance(i, naive_algo, plot=True)
+    eval_instance(i, algo, plot=True)
   else:
     instances = []
     for f_name in _instances_str:
       i = KServerInstance()
       i.parse(f_name)
       instances.append(i)
-    all_eval(instances, naive_algo, plot=True)
+    all_eval(instances, algo, plot=True)
 
 
 
@@ -140,4 +151,4 @@ if __name__ == "__main__":
   all_eval(range(15), algo, plot=True)
 '''
 
-  
+
