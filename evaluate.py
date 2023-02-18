@@ -30,7 +30,7 @@ def eval_instance(instance, algo, n_runs=100, confidence=0.95, plot=False):
 
   average = np.mean(scores)
   (low, high) = stats.norm.interval(confidence, loc=average, scale=stats.sem(scores))
-  # print(low, high)
+  print(low, high)
 
   if plot:
     plt.plot()
@@ -100,21 +100,22 @@ _instances_str = listdir("instances")
 
 
 if __name__ == "__main__":
-  # i = 0
-  # for index, f_name in enumerate(_instances_str):
-  #   if i % 2 == 0:
-  #     print("%2d"%index, f_name.ljust(35), end="")
-  #   else:
-  #     print(index, f_name)
-  #   i = (i+1) % 2
-  # print()
-  # n = int(input(f"-1 for all, 0-{len(_instances_str)} otherwise.\n"))
-  #
+  i = 0
+  for index, f_name in enumerate(_instances_str):
+    if i % 2 == 0:
+      print("%2d"%index, f_name.ljust(35), end="")
+    else:
+      print(index, f_name)
+    i = (i+1) % 2
+  print()
+  n = int(input(f"-1 for all, 0-{len(_instances_str)} otherwise.\n"))
 
+
+  # -------- Choose a algorithm --------------
   # algo = random_all_servers_algo
   algo = all_servers_algo
   # algo = naive_algo
-  n = -1
+
   if (n != -1):
     i = KServerInstance()
     f_name = _instances_str[n]
