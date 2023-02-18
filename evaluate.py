@@ -1,7 +1,14 @@
 # Evaluation of our solutions, using if_random.py example case.
 
 # Personnal
-from main import naive_algo, all_servers_algo, KServerInstance, random_all_servers_algo
+from main import (
+  naive_algo, 
+  all_servers_algo, 
+  KServerInstance, 
+  random_all_servers_algo, 
+  move_all_server_algo
+)
+
 
 # Std
 from os import listdir
@@ -113,8 +120,9 @@ if __name__ == "__main__":
 
   # -------- Choose a algorithm --------------
   # algo = random_all_servers_algo
-  algo = all_servers_algo
+  # algo = all_servers_algo
   # algo = naive_algo
+  algo = move_all_server_algo
 
   if (n != -1):
     i = KServerInstance()

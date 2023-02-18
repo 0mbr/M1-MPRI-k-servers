@@ -1,7 +1,15 @@
 # pattern matching and regexp
-import re
+
+# Personnal
 from run_state import RunState
+
+# Std
 import random
+import re
+
+# Third party
+import numpy as np
+
 
 f_instance = './instances/'
 
@@ -112,6 +120,33 @@ def random_all_servers_algo(k_instance: KServerInstance):
     # print("The offline result is: " + str(state.k_instance.opt))
     # print("The online algorithm result is: " + str(state.sum_distance))
     return state.sum_distance
+
+
+def move_all_server_algo(k_instance):
+  '''
+  Phase 1 : move all servers
+  Phase 2 : prioritize closest server
+
+  20 instances difference of sum_distance: 12,691
+  '''
+  state      = RunState(k_instance)
+  n_servers  = k_instance.k
+  n_reqs     = len(k_instance.requests)
+  num_server = 0
+
+  # -------- Phase 1 --------
+  while (state.num_request < n_servers 
+        and state.num_request < n_reqs):
+    state.update(num_server)
+    num_server  += 1
+
+  # -------- Phase 2 --------
+  while state.num_request < n_reqs:
+    distances = state.distances
+    num_server = np.argmin(state.distances)
+    state.update(num_server)
+
+  return state.sum_distance
 
 
 if __name__ == "__main__":
