@@ -19,10 +19,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
 
-
-def eval_instance(instance, algo, n_runs=100, confidence=0.95, plot=False):
+def eval_instance_det(instance, algo):
   '''
-  Evaluation of an algorithm over n_runs. If plotting is enabled, plot the scores
+  Evaluation of a deterministic algorithm
+  '''
+  state = algo(instance)
+  print("Opt   : ", instance.opt)
+  print("Score : ", state.sum_distance)
+  #print("Moves : ", list(state.moves))
+
+  return state
+
+def eval_instance_rand(instance, algo, n_runs=100, confidence=0.95, plot=False):
+  '''
+  Evaluation of a random algorithm over n_runs. If plotting is enabled, plot the scores
   and the confidence interval.
 
   Returns a tuple with:
@@ -62,7 +72,7 @@ def all_eval(instances, algo, n_runs=100, confidence=0.95, plot=False):
   intervals = []
   opts = []
   for instance in instances:
-    avg, confidence_interval = eval_instance(instance, algo, n_runs, confidence)
+    avg, confidence_interval = eval_instance_rand(instance, algo, n_runs, confidence)
     averages.append(avg)
     intervals.append(confidence_interval)
     opts.append(instance.opt)
@@ -129,7 +139,10 @@ if __name__ == "__main__":
     i = KServerInstance()
     f_name = _instances_str[n]
     i.parse(f_name)
-    eval_instance(i, algo, plot=True)
+    # random algo
+    # eval_instance_rand(i, algo, plot=True)
+    # deterministic algo
+    eval_instance_det(i, algo)
   else:
     instances = []
     for f_name in _instances_str:

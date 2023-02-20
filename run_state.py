@@ -3,6 +3,7 @@ class Server:
         self.id = id_server
         self.pos_x = 0
         self.pos_y = 0
+        self.moves = [(0,0)]
 
     def __repr__(self):
         return "server: x: " + str(self.pos_x) + ", y: " + str(self.pos_y)
@@ -17,6 +18,11 @@ class Server:
         """
         return abs(self.pos_x - position[0]) + abs(self.pos_y - position[1])
 
+    def move(self, x, y):
+        self.pos_x = x
+        self.pos_y = y
+        self.moves.append((x, y))
+
 
 class RunState:
     def __init__(self, k_instance):
@@ -30,6 +36,7 @@ class RunState:
         self.servers = []
         self.num_request = 0
         self.sum_distance = 0
+        self.turns = [] # turns[i] = what server moved for request i
 
         # initiation of k servers
         for index in range(self.k_instance.k):
@@ -63,17 +70,30 @@ class RunState:
         """
         if self.num_request == len(self.k_instance.requests):
             print("It is over!")
-        else:
-            distance = self.distances[selected_server]
-            self.sum_distance = self.sum_distance + distance
+            return
+        
+        distance = self.distances[selected_server]
+        self.sum_distance = self.sum_distance + distance
 
-            # print("num_request: " + str(self.num_request))
-            # print("selected server number: " + str(selected_server) + ", " + str(self.servers[selected_server]))
-            # print("distances: " + str(self.distances))
+        self.servers[selected_server].move(*self.get_customer_site())
+        
+        self.num_request += 1
+        self.turns.append(selected_server)
 
-            self.servers[selected_server].pos_x, self.servers[selected_server].pos_y = self.get_customer_site()
+        # print("num_request: " + str(self.num_request))
+        # print("selected server number: " + str(selected_server) + ", " + str(self.servers[selected_server]))
+        # print("distances: " + str(self.distances))
+        # print("Updated, sum distance: " + str(self.sum_distance))
+        # print("---------------------------------------")
 
-            # print("Updated, sum distance: " + str(self.sum_distance))
-            # print("---------------------------------------")
-
-            self.num_request += 1
+    @property
+    def moves(self):
+        '''
+        Iterator on the sequence of moves done by the servers during the run. 
+        Ignores the first move, registered at pos (0, 0).
+        At each step, yields i_server, (x, y).
+        '''
+        indices = [1]*len(self.k_instance.requests)
+        for s in self.turns:
+            yield s, self.servers[s].moves[indices[s]]
+            indices[s] += 1
