@@ -67,7 +67,7 @@ def naive_algo(k_instance: KServerInstance):
         index = distances.index(min_distance)
         # choose the closest server to treat the costumer
         state.update(index)
-    return state.sum_distance
+    return state
 
 
 def all_servers_algo(k_instance: KServerInstance):
@@ -95,7 +95,7 @@ def all_servers_algo(k_instance: KServerInstance):
         state.update(index)
     # print("The offline result is: " + str(state.k_instance.opt))
     # print("The online algorithm result is: " + str(state.sum_distance))
-    return state.sum_distance
+    return state
 
 
 def random_all_servers_algo(k_instance: KServerInstance):
@@ -119,7 +119,7 @@ def random_all_servers_algo(k_instance: KServerInstance):
         state.update(index)
     # print("The offline result is: " + str(state.k_instance.opt))
     # print("The online algorithm result is: " + str(state.sum_distance))
-    return state.sum_distance
+    return state
 
 
 def move_all_server_algo(k_instance):
@@ -146,7 +146,7 @@ def move_all_server_algo(k_instance):
     num_server = np.argmin(state.distances)
     state.update(num_server)
 
-  return state.sum_distance
+  return state
 
 
 if __name__ == "__main__":
