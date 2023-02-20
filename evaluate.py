@@ -33,7 +33,8 @@ def eval_instance(instance, algo, n_runs=100, confidence=0.95, plot=False):
   '''
   scores = []
   for epoch in range(n_runs):
-    scores.append(algo(instance))
+    state = algo(instance)
+    scores.append(state.sum_distance)
 
   average = np.mean(scores)
   (low, high) = stats.norm.interval(confidence, loc=average, scale=stats.sem(scores))
