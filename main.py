@@ -142,8 +142,34 @@ def move_all_server_algo(k_instance):
 
   # -------- Phase 2 --------
   while state.num_request < n_reqs:
-    distances = state.distances
     num_server = np.argmin(state.distances)
+    state.update(num_server)
+
+  return state
+
+def move_all_server_randalgo(k_instance):
+  '''
+  Phase 1 : move all servers
+  Phase 2 : 50/50 : random (uniform distribution) / closest server
+
+  20 instances difference of sum_distance: 12,691
+  '''
+  state      = RunState(k_instance)
+  n_servers  = k_instance.k
+  n_reqs     = len(k_instance.requests)
+  num_server = 0
+
+  # -------- Phase 1 --------
+  while (state.num_request < n_servers 
+        and state.num_request < n_reqs):
+    state.update(num_server)
+    num_server  += 1
+
+  # -------- Phase 2 --------
+  while state.num_request < n_reqs:
+    num_server = (np.random.randint(0, k_instance.k) 
+                  if np.random.rand() < 0.1 else 
+                  np.argmin(state.distances))
     state.update(num_server)
 
   return state
@@ -151,6 +177,6 @@ def move_all_server_algo(k_instance):
 
 if __name__ == "__main__":
     kinstance = KServerInstance()
-    kinstance.parse("instance_N200_OPT347.inst")
-    # naive_algo(kinstance)
-    all_servers_algo(kinstance)
+    #kinstance.parse("instance_N200_OPT347.inst")
+    ## naive_algo(kinstance)
+    #all_servers_algo(kinstance)

@@ -4,6 +4,7 @@ class Server:
         self.pos_x = 0
         self.pos_y = 0
         self.moves = [(0,0)]
+        self.sum_distance = 0
 
     def __repr__(self):
         return "server: x: " + str(self.pos_x) + ", y: " + str(self.pos_y)
@@ -75,6 +76,7 @@ class RunState:
         distance = self.distances[selected_server]
         self.sum_distance = self.sum_distance + distance
 
+        self.servers[selected_server].sum_distance += distance
         self.servers[selected_server].move(*self.get_customer_site())
         
         self.num_request += 1

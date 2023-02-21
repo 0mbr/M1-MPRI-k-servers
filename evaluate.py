@@ -6,7 +6,8 @@ from main import (
   all_servers_algo, 
   KServerInstance, 
   random_all_servers_algo, 
-  move_all_server_algo
+  move_all_server_algo,
+  move_all_server_randalgo
 )
 
 
@@ -26,6 +27,7 @@ def eval_instance_det(instance, algo):
   state = algo(instance)
   print("Opt   : ", instance.opt)
   print("Score : ", state.sum_distance)
+  print("servers distances : ", list([s.sum_distance for s in state.servers]))
   #print("Moves : ", list(state.moves))
 
   return state
@@ -48,14 +50,17 @@ def eval_instance_rand(instance, algo, n_runs=100, confidence=0.95, plot=False):
 
   average = np.mean(scores)
   (low, high) = stats.norm.interval(confidence, loc=average, scale=stats.sem(scores))
-  print(low, high)
+  # print(low, high, average)
 
   if plot:
     plt.plot()
 
+    low_diff  = average - low
+    high_diff = high - average
+
     x = np.arange(len(scores))
     plot_curve(x, scores, "score")
-    plot_fill(x, [(low, high) for i in range(len(x))])
+    plot_fill(x, [(scores[i] - low_diff, scores[i] + high_diff) for i in range(len(x))])
     plot_set_yticks(scores)
     plt.legend()
     plt.show()
@@ -117,7 +122,7 @@ _instances_dir_str = "./instances/"
 _instances_str = listdir("instances")
 
 
-if __name__ == "__main__":
+def pick_instance():
   i = 0
   for index, f_name in enumerate(_instances_str):
     if i % 2 == 0:
@@ -126,30 +131,42 @@ if __name__ == "__main__":
       print(index, f_name)
     i = (i+1) % 2
   print()
-  n = int(input(f"-1 for all, 0-{len(_instances_str)} otherwise.\n"))
+  return int(input(f"-1 for all, 0-{len(_instances_str)} otherwise.\n"))
 
-
-  # -------- Choose a algorithm --------------
-  # algo = random_all_servers_algo
-  # algo = all_servers_algo
-  # algo = naive_algo
-  algo = move_all_server_algo
-
-  if (n != -1):
-    i = KServerInstance()
-    f_name = _instances_str[n]
-    i.parse(f_name)
-    # random algo
-    # eval_instance_rand(i, algo, plot=True)
-    # deterministic algo
-    eval_instance_det(i, algo)
-  else:
+def run_eval(algo, eval_type="det"):
+  n = pick_instance()
+  if n == -1:
     instances = []
     for f_name in _instances_str:
       i = KServerInstance()
       i.parse(f_name)
       instances.append(i)
     all_eval(instances, algo, plot=True)
+  else:
+    i = KServerInstance()
+    i.parse(_instances_str[n])
+    if eval_type == "det":
+      eval_instance_det(i, algo)
+    elif eval_type == "rand":
+      eval_instance_rand(i, algo, plot=True)
+
+if __name__ == "__main__":
+
+  algo = 0
+  eval_type = sys.argv[1]
+
+  if eval_type == "rand":
+    # algo = move_all_server_randalgo 
+    algo = random_all_servers_algo
+  elif eval_type == "det":
+    # algo = all_servers_algo
+    # algo = naive_algo
+    algo = move_all_server_algo
+  else:
+    print("please specify rand or det")
+
+  run_eval(algo, eval_type)
+
 
 
 
