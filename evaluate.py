@@ -20,6 +20,124 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
 
+
+_instances_dir_str = "./instances/"
+_instances_str = listdir("instances")
+
+
+def eval_main():
+  # straightforward process of evaluating and plotting on all instances
+  # (for a deterministic algorithm)
+
+  # get algo and instances
+  algos = {
+    "move all server algo": move_all_server_algo,
+    "naive algo": naive_algo
+  }
+  instances = []
+  for f_name in _instances_str:
+      i = KServerInstance()
+      i.parse(f_name)
+      instances.append(i)
+  n_instances = len(instances)
+  confidence = 0.95
+
+  # compute averages and intervals on each instance
+  algos_data = {}
+  for algo_name in algos:
+    algo = algos[algo_name]
+    algo_data = {}
+    averages = []
+    intervals = []
+    for i in instances:
+      scores = [algo(i).sum_distance for _ in range(100)]
+      average = np.mean(scores)
+      averages.append(average)
+      intervals.append(stats.norm.interval(confidence, loc=average, scale=stats.sem(scores)))
+    algo_data["averages"] = averages
+    algo_data["intervals"] = intervals
+    algos_data[algo_name] = algo_data
+
+  # now compute ratio and stuff about it
+  opts = [i.opt for i in instances]
+  for algo_name in algos:
+    algo_data = algos_data[algo_name]
+    ratios = [algo_data["averages"][i]/opts[i] for i in range(n_instances)]
+    algo_data["ratio_data"] = {
+      "mean": np.mean(ratios),
+      "worst" : np.max(ratios),
+      "best" : np.min(ratios),
+      "confidence" : stats.norm.interval(confidence, loc=(np.mean(ratios)), scale=stats.sem(ratios))  
+    }
+    algo_data["ratios"] = ratios
+
+  # Finally we can plot
+  # one figure to plot the score, one to plot the data
+  fig, (axis_scores, axis_ratios, axis_data) = plt.subplots(3, 1, figsize=(10, 40))
+  x_ticks = np.arange(n_instances)
+  font = {
+    'family': 'serif',
+    'color':  'black',
+    'weight': 'normal',
+    'size': 12,
+  }
+
+  data_txt = ""
+  for algo_name in algos:
+    algo_data = algos_data[algo_name]
+
+    axis_scores.plot(x_ticks, algo_data["averages"], label=algo_name)
+    axis_ratios.plot(x_ticks, algo_data["ratios"], label=algo_name)
+
+    data_txt += algo_name + " : \n"
+    ratio_data = algo_data["ratio_data"]
+    data_txt += "\tratio data : \n"
+    for prop in ratio_data:
+      data_txt += "\t" + prop + " : " + str(np.around(ratio_data[prop], 3)) + "  "
+    data_txt += "\n"
+
+  axis_data.text(0.01, 0, data_txt.expandtabs(), fontdict=font)
+  axis_scores.plot(x_ticks, opts, label="optimal values")
+  axis_ratios.plot(x_ticks, np.full((n_instances, 1) , 1), label="reference value")
+  
+  # stuff to ùake things more clear
+  axis_scores.set_xticks(x_ticks)
+  axis_ratios.set_xticks(x_ticks)
+  max_ratio = int(np.max(ratios)) + 2
+  axis_ratios.set_ylim(ymin=0, ymax=(max_ratio+int(max_ratio/3)))
+  plt.setp(axis_data.get_xticklabels(), visible=False)
+  plt.setp(axis_data.get_yticklabels(), visible=False)
+  axis_data.tick_params(axis='both', which='both', length=0)
+  axis_scores.legend()
+  axis_ratios.legend()
+  axis_data.legend()
+  plt.show()
+
+if __name__ == "__main__":
+  eval_main()
+
+
+
+'''
+if __name__ == "__main__":
+
+  algo = 0
+  eval_type = sys.argv[1]
+
+  if eval_type == "rand":
+    # algo = move_all_server_randalgo 
+    algo = random_all_servers_algo
+  elif eval_type == "det":
+    # algo = all_servers_algo
+    # algo = naive_algo
+    algo = move_all_server_algo
+  else:
+    print("please specify rand or det")
+
+  run_eval(algo, eval_type)
+'''
+
+
 def eval_instance_det(instance, algo):
   '''
   Evaluation of a deterministic algorithm
@@ -89,7 +207,6 @@ def all_eval(instances, algo, n_runs=100, confidence=0.95, plot=False):
     plot_fill(np.arange(len(averages)), intervals)
     plot_smoothen_yticks(averages)
     plt.legend()
-    plt.show()
 
   sum_diff = 0
   for i in range(len(averages)):
@@ -110,16 +227,16 @@ def eval_ratio(instances, averages, confidence=0.95, plot=False):
 
   if plot:
     n = len(averages)
-    plot_scatter(np.arange(n), np.full((n, 1), 1), "opt")
-    plot_scatter(np.arange(n), ratios, "ratio")
-    plot_smoothen_yticks(ratios)
-    plt.show()
+    # plot_scatter(np.arange(n), np.full((n, 1), 1), "opt")
+    # plot_scatter(np.arange(n), ratios, "ratio")
+    # plot_smoothen_yticks(ratios)
+    plt.text(3*n/4, 3*n/4, "HELLLLLLo")
 
 
 def plot_scatter(x, y, l, textual=False):
-  plt.scatter(x, y, label=l)
+  plt.plot(x, y, label=l)
   if textual:
-    
+    1
 
 
 def plot_fill(x, intervals):
@@ -134,10 +251,6 @@ def plot_fill(x, intervals):
 def plot_smoothen_yticks(y):
   max_y = int(np.max(y))
   plt.ylim(ymin=0, ymax=(max_y+int(max_y/3)))
-
-
-_instances_dir_str = "./instances/"
-_instances_str = listdir("instances")
 
 
 def pick_instance():
@@ -161,6 +274,7 @@ def run_eval(algo, eval_type="det"):
       instances.append(i)
     averages, intervals = all_eval(instances, algo, plot=True)
     eval_ratio(instances, averages, plot=True)
+    plt.show()
   else:
     i = KServerInstance()
     i.parse(_instances_str[n])
@@ -168,26 +282,6 @@ def run_eval(algo, eval_type="det"):
       eval_instance_det(i, algo)
     elif eval_type == "rand":
       eval_instance_rand(i, algo, plot=True)
-
-if __name__ == "__main__":
-
-
-  algo = 0
-  eval_type = sys.argv[1]
-
-  if eval_type == "rand":
-    # algo = move_all_server_randalgo 
-    algo = random_all_servers_algo
-  elif eval_type == "det":
-    # algo = all_servers_algo
-    # algo = naive_algo
-    algo = move_all_server_algo
-  else:
-    print("please specify rand or det")
-
-  run_eval(algo, eval_type)
-
-
 
 
 # Class to test evaluate-functions behaviors
