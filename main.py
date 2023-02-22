@@ -53,7 +53,7 @@ class KServerInstance:
 
 def naive_algo(k_instance: KServerInstance):
     """
-    Choose the closest server to treat the costumer for every request
+    Choose the closest server to treat the customer for every request
     20 instances difference of sum_distance: 148,614
     :param k_instance:
     :return:
@@ -98,6 +98,23 @@ def all_servers_algo(k_instance: KServerInstance):
     return state
 
 
+def naive_random_algo(k_instance: KServerInstance):
+    """
+    Choose randomly servers to treat the costumer for every request
+    :param k_instance:
+    :return:
+    """
+    state = RunState(k_instance)
+
+    while state.num_request <= len(state.k_instance.requests) - 1:
+        index = random.randint(0, len(state.servers)-1)
+
+        state.update(index)
+    # print("The offline result is: " + str(state.k_instance.opt))
+    # print("The online algorithm result is: " + str(state.sum_distance))
+    return state
+
+
 def random_all_servers_algo(k_instance: KServerInstance):
     """
     Choose randomly servers to treat the costumer for every request
@@ -115,7 +132,6 @@ def random_all_servers_algo(k_instance: KServerInstance):
             if server.never_move():
                 index = server.id
 
-        # choose the closest server to treat the costumer
         state.update(index)
     # print("The offline result is: " + str(state.k_instance.opt))
     # print("The online algorithm result is: " + str(state.sum_distance))
@@ -150,6 +166,7 @@ def move_all_server_algo(k_instance):
     state.update(num_server)
 
   return state
+
 
 def move_all_server_randalgo(k_instance):
   '''
