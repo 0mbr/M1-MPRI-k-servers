@@ -137,6 +137,10 @@ def move_all_server_algo(k_instance):
   # -------- Phase 1 --------
   while (state.num_request < n_servers 
         and state.num_request < n_reqs):
+    distances = state.distances
+    if np.min(distances) == 0:
+      state.update(np.argmin(distances))
+      continue
     state.update(num_server)
     num_server  += 1
 

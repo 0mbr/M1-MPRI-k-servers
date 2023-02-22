@@ -59,9 +59,9 @@ def eval_instance_rand(instance, algo, n_runs=100, confidence=0.95, plot=False):
     high_diff = high - average
 
     x = np.arange(len(scores))
-    plot_curve(x, scores, "score")
+    plot_scatter(x, scores, "score")
     plot_fill(x, [(scores[i] - low_diff, scores[i] + high_diff) for i in range(len(x))])
-    plot_set_yticks(scores)
+    plot_smoothen_yticks(scores)
     plt.legend()
     plt.show()
 
@@ -84,10 +84,10 @@ def all_eval(instances, algo, n_runs=100, confidence=0.95, plot=False):
 
   if plot:
     x = np.arange(len(averages))
-    plot_curve(x, averages, "scores")
-    plot_curve(x, opts, "opt")
+    plot_scatter(x, averages, "scores")
+    plot_scatter(x, opts, "opt")
     plot_fill(np.arange(len(averages)), intervals)
-    plot_set_yticks(averages)
+    plot_smoothen_yticks(averages)
     plt.legend()
     plt.show()
 
@@ -99,9 +99,27 @@ def all_eval(instances, algo, n_runs=100, confidence=0.95, plot=False):
   return averages, intervals
 
 
-def plot_curve(x, y, l):
-  plt.plot(x, y, label=l)
-  max_y = np.max(y)
+def eval_ratio(instances, averages, confidence=0.95, plot=False):
+  ratios = list([average / instances[i].opt for i, average in enumerate(averages)])
+  print("Ratios : ", ratios)
+  print("Worst ratio : ", np.max(ratios))
+  mean = np.mean(ratios)
+  print("Average ratio : ", mean)
+  print("Confidence : ", stats.norm.interval(confidence, loc=mean, scale=stats.sem(ratios)))
+  print("Best ratio  : ", np.min(ratios))
+
+  if plot:
+    n = len(averages)
+    plot_scatter(np.arange(n), np.full((n, 1), 1), "opt")
+    plot_scatter(np.arange(n), ratios, "ratio")
+    plot_smoothen_yticks(ratios)
+    plt.show()
+
+
+def plot_scatter(x, y, l, textual=False):
+  plt.scatter(x, y, label=l)
+  if textual:
+    
 
 
 def plot_fill(x, intervals):
@@ -113,7 +131,7 @@ def plot_fill(x, intervals):
   plt.fill_between(x, y_lower, y_upper, color="orange", alpha=0.3, linewidth=0.6)
 
 
-def plot_set_yticks(y):
+def plot_smoothen_yticks(y):
   max_y = int(np.max(y))
   plt.ylim(ymin=0, ymax=(max_y+int(max_y/3)))
 
@@ -141,7 +159,8 @@ def run_eval(algo, eval_type="det"):
       i = KServerInstance()
       i.parse(f_name)
       instances.append(i)
-    all_eval(instances, algo, plot=True)
+    averages, intervals = all_eval(instances, algo, plot=True)
+    eval_ratio(instances, averages, plot=True)
   else:
     i = KServerInstance()
     i.parse(_instances_str[n])
@@ -151,6 +170,7 @@ def run_eval(algo, eval_type="det"):
       eval_instance_rand(i, algo, plot=True)
 
 if __name__ == "__main__":
+
 
   algo = 0
   eval_type = sys.argv[1]
