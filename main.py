@@ -6,6 +6,7 @@ from run_state import RunState
 # Std
 import random
 import re
+import math
 
 # Third party
 import numpy as np
@@ -194,6 +195,40 @@ def move_all_server_randalgo(k_instance):
     state.update(num_server)
 
   return state
+
+
+def sigmoid(x):
+    # return 1 / (1 + math.exp(-0.1*(x-40)))
+    return 1 / (1 + math.exp(-x))
+
+
+def is_tired(n):
+    rand = random.random()
+    proba = sigmoid(n)
+    return rand < proba
+
+
+def random_tired_algo(k_instance):
+    """
+        Choose randomly servers to treat the costumer for every request
+        :param k_instance:
+        :return:
+        """
+    state = RunState(k_instance)
+
+    while state.num_request <= len(state.k_instance.requests) - 1:
+        index = random.randint(0, len(state.servers) - 1)
+        #
+        # # while is_tired(state.servers[index].move_times):
+        #     # index = random.randint(0, len(state.servers) - 1)
+        # print(is_tired(state.servers[index].move_times))
+        if is_tired(state.servers[index].move_times):
+            index = np.argmin(state.distances)
+
+        state.update(index)
+    # print("The offline result is: " + str(state.k_instance.opt))
+    # print("The online algorithm result is: " + str(state.sum_distance))
+    return state
 
 
 if __name__ == "__main__":

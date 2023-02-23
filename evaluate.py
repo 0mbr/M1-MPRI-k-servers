@@ -2,12 +2,12 @@
 
 # Personnal
 from main import (
-  naive_algo, 
-  all_servers_algo, 
-  KServerInstance, 
-  random_all_servers_algo, 
+  naive_algo,
+  all_servers_algo,
+  KServerInstance,
+  random_all_servers_algo,
   move_all_server_algo,
-  move_all_server_randalgo
+  move_all_server_randalgo, random_tired_algo
 )
 
 
@@ -31,7 +31,8 @@ def eval_main():
 
   # get algo and instances
   algos = {
-    "move all server algo": move_all_server_algo,
+    "random_tired_algo": random_tired_algo,
+    # "move all server algo": move_all_server_algo,
     "naive algo": naive_algo
   }
   instances = []
@@ -125,8 +126,8 @@ if __name__ == "__main__":
   eval_type = sys.argv[1]
 
   if eval_type == "rand":
-    # algo = move_all_server_randalgo 
-    algo = random_all_servers_algo
+    algo = move_all_server_randalgo
+    # algo = random_all_servers_algo
   elif eval_type == "det":
     # algo = all_servers_algo
     # algo = naive_algo
@@ -211,7 +212,7 @@ def all_eval(instances, algo, n_runs=100, confidence=0.95, plot=False):
   sum_diff = 0
   for i in range(len(averages)):
     sum_diff += averages[i] - opts[i]
-  print("The 20 instances difference of sum distance between opt and average: " + str(sum_diff))
+  print("The 20 instances difference of sum distance between opt and our score: " + str(sum_diff))
 
   return averages, intervals
 
