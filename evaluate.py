@@ -210,7 +210,7 @@ def all_eval(instances, algo, n_runs=100, confidence=0.95, plot=False):
   sum_diff = 0
   for i in range(len(averages)):
     sum_diff += averages[i] - opts[i]
-  print("The 20 instances difference of sum distance between opt and average: " + str(sum_diff))
+  print("The 20 instances difference of sum distance between opt and our score: " + str(sum_diff))
 
   return averages, intervals
 
