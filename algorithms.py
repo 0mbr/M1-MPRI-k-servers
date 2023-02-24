@@ -1,54 +1,13 @@
-# pattern matching and regexp
-
 # Personnal
 from run_state import RunState
+from parse import KServerInstance
 
 # Std
 import random
-import re
+import math
 
 # Third party
 import numpy as np
-
-
-f_instance = './instances/'
-
-
-class KServerInstance:
-
-    # Grid dimensions
-    # width  = 100
-    # height = 100
-
-    def __init__(self):
-        self.k = None  # number of technicians
-        self.opt = None  # opt value
-
-        # list of tuple coordinates. The indice i can be interpreted as a customer
-        self.sites = None
-
-        # The list of requests from the customers.
-        # The j-th request is the one at coordinates sites[request[j]]
-        self.requests = None
-
-    def parse(self, f_name: str) -> None:
-        rm_stuff = (lambda stuff, word: word.replace(stuff, ""))
-        to_pairs = (lambda words: list([(w.split(" ")[0], w.split(" ")[1]) for w in words]))
-        field = "# [A-Z, a-z]*\n"  # pattern to split quickly over fields
-        with open(f_instance + f_name) as f:
-            data = f.read()
-            lines = re.split(field, data)
-            self.opt = int(rm_stuff("\n", lines[1]))
-            self.k = int(rm_stuff("\n", lines[2]))
-            coords_str = to_pairs(rm_stuff("\n\n", lines[3]).split("\n"))
-            self.sites = [(int(x), int(y)) for x, y in coords_str]
-            requests_str = rm_stuff("\n", lines[4]).split(" ")[:-1]
-            self.requests = list([int(w) for w in requests_str])
-
-            # print(self.opt)
-            # print(self.k)
-            # print(self.sites)
-            # print(self.requests)
 
 
 def naive_algo(k_instance: KServerInstance):
@@ -171,7 +130,7 @@ def move_all_server_algo(k_instance):
 def move_all_server_randalgo(k_instance):
   '''
   Phase 1 : move all servers
-  Phase 2 : 50/50 : random (uniform distribution) / closest server
+  Phase 2 : random (uniform distribution) / closest server
 
   20 instances difference of sum_distance: 12,691
   '''
@@ -196,8 +155,35 @@ def move_all_server_randalgo(k_instance):
   return state
 
 
-if __name__ == "__main__":
-    kinstance = KServerInstance()
-    #kinstance.parse("instance_N200_OPT347.inst")
-    ## naive_algo(kinstance)
-    #all_servers_algo(kinstance)
+def sigmoid(x):
+    # return 1 / (1 + math.exp(-0.1*(x-40)))
+    return 1 / (1 + math.exp(-x))
+
+
+def is_tired(n):
+    rand = random.random()
+    proba = sigmoid(n)
+    return rand < proba
+
+
+def random_tired_algo(k_instance):
+    """
+        Choose randomly servers to treat the costumer for every request
+        :param k_instance:
+        :return:
+        """
+    state = RunState(k_instance)
+
+    while state.num_request <= len(state.k_instance.requests) - 1:
+        index = random.randint(0, len(state.servers) - 1)
+        #
+        # # while is_tired(state.servers[index].move_times):
+        #     # index = random.randint(0, len(state.servers) - 1)
+        # print(is_tired(state.servers[index].move_times))
+        if is_tired(state.servers[index].nb_moves):
+            index = np.argmin(state.distances)
+
+        state.update(index)
+    # print("The offline result is: " + str(state.k_instance.opt))
+    # print("The online algorithm result is: " + str(state.sum_distance))
+    return state

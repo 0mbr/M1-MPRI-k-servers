@@ -24,6 +24,10 @@ class Server:
         self.pos_y = y
         self.moves.append((x, y))
 
+    @property
+    def nb_moves(self):
+        return len(self.moves)
+
 
 class RunState:
     def __init__(self, k_instance):

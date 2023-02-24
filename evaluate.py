@@ -1,19 +1,20 @@
 # Evaluation of our solutions, using if_random.py example case.
 
 # Personnal
-from main import (
+from algorithms import (
   naive_algo, 
   all_servers_algo, 
-  KServerInstance, 
   random_all_servers_algo, 
   move_all_server_algo,
-  move_all_server_randalgo
+  move_all_server_randalgo,
+  random_tired_algo,
+  naive_random_algo
 )
 
+from parse import KServerInstance
 
 # Std
 from os import listdir
-import sys
 
 # Thrid party
 import matplotlib.pyplot as plt
@@ -27,12 +28,15 @@ _instances_str = listdir("instances")
 
 def eval_main():
   # straightforward process of evaluating and plotting on all instances
-  # (for a deterministic algorithm)
 
   # get algo and instances
   algos = {
     "move all server algo": move_all_server_algo,
-    "naive algo": naive_algo
+    #"naive algo": naive_algo,
+    #"random all servers algo": random_all_servers_algo,
+    "all servers algo" :all_servers_algo,
+    "naive random algo": naive_random_algo,
+    "random tired algo" : random_tired_algo
   }
   instances = []
   for f_name in _instances_str:
@@ -42,7 +46,8 @@ def eval_main():
   n_instances = len(instances)
   confidence = 0.95
 
-  # compute averages and intervals on each instance
+  # compute averages and intervals on each instance. Of course it doesn't make sense
+  # for deterministic algorithms.
   algos_data = {}
   for algo_name in algos:
     algo = algos[algo_name]
@@ -73,7 +78,8 @@ def eval_main():
 
   # Finally we can plot
   # one figure to plot the score, one to plot the data
-  fig, (axis_scores, axis_ratios, axis_data) = plt.subplots(3, 1, figsize=(10, 40))
+  fig, (axis_scores, axis_ratios, axis_data) = plt.subplots(1, 3, figsize=(40, 10))
+  # fig, (axis_scores, axis_ratios, axis_data) = plt.subplots(3, 1, figsize=(10, 40))
   x_ticks = np.arange(n_instances)
   font = {
     'family': 'serif',
@@ -100,7 +106,7 @@ def eval_main():
   axis_scores.plot(x_ticks, opts, label="optimal values")
   axis_ratios.plot(x_ticks, np.full((n_instances, 1) , 1), label="reference value")
   
-  # stuff to ùake things more clear
+  # stuff to make things more clear
   axis_scores.set_xticks(x_ticks)
   axis_ratios.set_xticks(x_ticks)
   max_ratio = int(np.max(ratios)) + 2
@@ -112,30 +118,6 @@ def eval_main():
   axis_ratios.legend()
   axis_data.legend()
   plt.show()
-
-if __name__ == "__main__":
-  eval_main()
-
-
-
-'''
-if __name__ == "__main__":
-
-  algo = 0
-  eval_type = sys.argv[1]
-
-  if eval_type == "rand":
-    # algo = move_all_server_randalgo 
-    algo = random_all_servers_algo
-  elif eval_type == "det":
-    # algo = all_servers_algo
-    # algo = naive_algo
-    algo = move_all_server_algo
-  else:
-    print("please specify rand or det")
-
-  run_eval(algo, eval_type)
-'''
 
 
 def eval_instance_det(instance, algo):
@@ -149,6 +131,7 @@ def eval_instance_det(instance, algo):
   #print("Moves : ", list(state.moves))
 
   return state
+
 
 def eval_instance_rand(instance, algo, n_runs=100, confidence=0.95, plot=False):
   '''
@@ -184,6 +167,22 @@ def eval_instance_rand(instance, algo, n_runs=100, confidence=0.95, plot=False):
     plt.show()
 
   return (average, (low, high))
+
+if __name__ == "__main__":
+  # print instances
+  i = 0
+  for index, f_name in enumerate(_instances_str):
+    if i % 2 == 0:
+      print("%2d"%index, f_name.ljust(35), end="")
+    else:
+      print(index, f_name)
+    i = (i+1) % 2
+  print()
+
+  # evaluation script
+  eval_main()
+
+
 
 
 def all_eval(instances, algo, n_runs=100, confidence=0.95, plot=False):
@@ -233,10 +232,8 @@ def eval_ratio(instances, averages, confidence=0.95, plot=False):
     plt.text(3*n/4, 3*n/4, "HELLLLLLo")
 
 
-def plot_scatter(x, y, l, textual=False):
+def plot_scatter(x, y, l):
   plt.plot(x, y, label=l)
-  if textual:
-    1
 
 
 def plot_fill(x, intervals):
@@ -264,6 +261,7 @@ def pick_instance():
   print()
   return int(input(f"-1 for all, 0-{len(_instances_str)} otherwise.\n"))
 
+
 def run_eval(algo, eval_type="det"):
   n = pick_instance()
   if n == -1:
@@ -284,25 +282,21 @@ def run_eval(algo, eval_type="det"):
       eval_instance_rand(i, algo, plot=True)
 
 
-# Class to test evaluate-functions behaviors
-class RandomAlgo:
-  def __init__(self, lower_bound, upper_bound):
-    self.rng   = np.random.default_rng()
-    self.low_b = lower_bound
-    self.up_b  = upper_bound
-
-  def __call__(self, some_stuff):
-    rd = self.rng.random()
-    rd = (self.up_b - self.low_b) * rd + self.low_b
-    return rd
-
 '''
 if __name__ == "__main__":
-  instance = None
-  algo = RandomAlgo(70, 120)
 
-  eval_instance(None, algo, plot=True)
-  all_eval(range(15), algo, plot=True)
+  algo = 0
+  eval_type = sys.argv[1]
+
+  if eval_type == "rand":
+    # algo = move_all_server_randalgo 
+    algo = random_all_servers_algo
+  elif eval_type == "det":
+    # algo = all_servers_algo
+    # algo = naive_algo
+    algo = move_all_server_algo
+  else:
+    print("please specify rand or det")
+
+  run_eval(algo, eval_type)
 '''
-
-
