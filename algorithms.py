@@ -187,8 +187,3 @@ def random_tired_algo(k_instance):
     # print("The offline result is: " + str(state.k_instance.opt))
     # print("The online algorithm result is: " + str(state.sum_distance))
     return state
-
-        state.update(index)
-    # print("The offline result is: " + str(state.k_instance.opt))
-    # print("The online algorithm result is: " + str(state.sum_distance))
-    return state
